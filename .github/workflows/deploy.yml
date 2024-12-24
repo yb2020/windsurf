@@ -51,6 +51,7 @@ jobs:
           RESPONSE=$(curl -s -X POST "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/pages/projects/windsurf/deployments" \
             -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" \
             -F "file=@build.tar.gz" \
+            -F "manifest=@build/manifest.json;type=application/json" \
             --write-out "%{http_code}")
 
           echo "Response code: ${RESPONSE}"
