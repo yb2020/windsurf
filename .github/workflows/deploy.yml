@@ -30,17 +30,22 @@ jobs:
         env:
           CI: false
           
-      - name: Deploy to Cloudflare Pages
-        uses: cloudflare/pages-action@v1
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          projectName: windsurf
-          directory: build
-          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
-          
       - name: Install Wrangler
         run: pnpm add -g wrangler
+          
+      - name: Deploy to Cloudflare Pages
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          # Create a deployment using direct API call
+          echo "Creating deployment..."
+          DEPLOYMENT_ID=$(curl -X POST "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/pages/projects/windsurf/deployments" \
+            -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" \
+            -F "files[]=@build/**/*" \
+            | jq -r '.result.id')
+          
+          echo "Deployment ID: ${DEPLOYMENT_ID}"
           
       - name: Deploy Worker
         env:
