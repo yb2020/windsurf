@@ -1,0 +1,13 @@
+name = "cloudflare-fullstack-app"
+main = "workers/index.ts"
+compatibility_date = "2023-12-01"
+
+[dev]
+port = 8787
+
+[vars]
+# Environment variables are now managed through Cloudflare Dashboard
+# or through .dev.vars file locally
+
+[env.development]
+vars = { }
