@@ -8,57 +8,58 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    name: Deploy
+    name: Deploy to Cloudflare Pages and Workers
     steps:
-      - uses: actions/checkout@v4
-      
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '18'
-          
+
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
         with:
           version: 8.7.1
-          
+
       - name: Install Dependencies
         run: pnpm install
-        
+
       - name: Build Frontend
         run: pnpm run build
         env:
           CI: false
-          
+
       - name: Install Wrangler
         run: pnpm add -g wrangler
-          
+
       - name: Deploy to Cloudflare Pages
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: |
           echo "Creating deployment..."
-          cd build
           
-          # Create a tar file of the build directory
-          tar -czf ../build.tar.gz .
-          cd ..
-          
+          # Create a tarball of the build directory
+          tar -czf build.tar.gz -C build .
+
+          # Debugging: Check file existence
+          ls -l build.tar.gz
+
           # Upload using curl
-          RESPONSE=$(curl -X POST "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/pages/projects/windsurf/deployments" \
+          RESPONSE=$(curl -s -X POST "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/pages/projects/windsurf/deployments" \
             -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" \
             -F "file=@build.tar.gz" \
-            -F "manifest=@build/manifest.json;type=application/json" \
             --write-out "%{http_code}")
-          
+
           echo "Response code: ${RESPONSE}"
-          
-          if [ "${RESPONSE}" != "200" ]; then
+
+          if [[ "${RESPONSE}" != "200" ]]; then
             echo "Failed to deploy to Pages"
             exit 1
           fi
-          
+
       - name: Deploy Worker
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
