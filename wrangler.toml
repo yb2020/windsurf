@@ -18,5 +18,8 @@ port = 8787
 [site]
 bucket = "./build"  # React build output directory
 
+# Pages build configuration
+pages_build_output_dir = "build"
+
 [env.development]
 vars = { }
