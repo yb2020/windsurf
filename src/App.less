@@ -1,0 +1,102 @@
+// Variables
+@header-bg-color: #282c34;
+@text-color: white;
+@link-color: #61dafb;
+@error-color: #ff4d4f;
+
+.App {
+  text-align: center;
+
+  &-header {
+    background-color: @header-bg-color;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 40px 20px;
+    font-size: calc(10px + 1vmin);
+    color: @text-color;
+  }
+
+  &-input {
+    width: 80%;
+    max-width: 800px;
+    margin: 20px auto;
+
+    textarea {
+      width: 100%;
+      min-height: 100px;
+      padding: 12px;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      background-color: rgba(255, 255, 255, 0.1);
+      color: @text-color;
+      font-size: 16px;
+      resize: vertical;
+      
+      &:focus {
+        outline: none;
+        border-color: @link-color;
+      }
+    }
+
+    button {
+      margin-top: 10px;
+      padding: 8px 20px;
+      border: none;
+      border-radius: 4px;
+      background-color: @link-color;
+      color: @header-bg-color;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+
+      &:hover {
+        background-color: darken(@link-color, 10%);
+      }
+
+      &:disabled {
+        background-color: #ccc;
+        cursor: not-allowed;
+      }
+    }
+  }
+
+  &-output {
+    width: 80%;
+    max-width: 800px;
+    height: 300px;
+    margin: 20px auto;
+    padding: 20px;
+    border-radius: 8px;
+    background-color: rgba(255, 255, 255, 0.1);
+    color: @text-color;
+    text-align: left;
+    overflow-y: auto;
+    position: relative;
+    
+    &-content {
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    &-cursor {
+      display: inline-block;
+      width: 2px;
+      height: 1em;
+      background-color: @text-color;
+      margin-left: 2px;
+      animation: blink 1s step-end infinite;
+    }
+  }
+}
+
+@keyframes blink {
+  from, to {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+}
