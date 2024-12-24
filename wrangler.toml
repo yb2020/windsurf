@@ -1,4 +1,4 @@
-name = "cloudflare-fullstack-app"
+name = "windsurf-worker"
 main = "workers/index.ts"
 compatibility_date = "2023-12-01"
 
@@ -20,8 +20,3 @@ bucket = "./build"  # React build output directory
 
 [env.development]
 vars = { }
-
-# Pages specific configuration
-[pages]
-build_output_directory = "build"
-assets_path = "./build"
