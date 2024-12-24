@@ -38,14 +38,26 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: |
-          # Create a deployment using direct API call
           echo "Creating deployment..."
-          DEPLOYMENT_ID=$(curl -X POST "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/pages/projects/windsurf/deployments" \
-            -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" \
-            -F "files[]=@build/**/*" \
-            | jq -r '.result.id')
+          cd build
           
-          echo "Deployment ID: ${DEPLOYMENT_ID}"
+          # Create a tar file of the build directory
+          tar -czf ../build.tar.gz .
+          cd ..
+          
+          # Upload using curl
+          RESPONSE=$(curl -X POST "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/pages/projects/windsurf/deployments" \
+            -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" \
+            -F "file=@build.tar.gz" \
+            -F "manifest=@build/manifest.json;type=application/json" \
+            --write-out "%{http_code}")
+          
+          echo "Response code: ${RESPONSE}"
+          
+          if [ "${RESPONSE}" != "200" ]; then
+            echo "Failed to deploy to Pages"
+            exit 1
+          fi
           
       - name: Deploy Worker
         env:
