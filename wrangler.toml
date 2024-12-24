@@ -2,6 +2,11 @@ name = "cloudflare-fullstack-app"
 main = "workers/index.ts"
 compatibility_date = "2023-12-01"
 
+# Worker configuration
+[build]
+command = "pnpm install && pnpm run build"
+watch_dir = "workers"
+
 [dev]
 port = 8787
 
@@ -9,5 +14,14 @@ port = 8787
 # Environment variables are now managed through Cloudflare Dashboard
 # or through .dev.vars file locally
 
+# Pages configuration
+[site]
+bucket = "./build"  # React build output directory
+
 [env.development]
 vars = { }
+
+# Pages specific configuration
+[pages]
+build_output_directory = "build"
+assets_path = "./build"
