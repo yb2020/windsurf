@@ -41,22 +41,50 @@ jobs:
         run: |
           echo "Creating deployment..."
           
+          # Create manifest.json
+          cd build
+          echo "{" > manifest.json
+          echo "  \"files\": {" >> manifest.json
+          first=true
+          find . -type f ! -name 'manifest.json' -print0 | while IFS= read -r -d '' file; do
+            # Remove leading ./
+            file_path="${file#./}"
+            # Calculate file hash
+            file_hash=$(sha256sum "$file" | cut -d ' ' -f 1)
+            if [ "$first" = true ]; then
+              first=false
+            else
+              echo "," >> manifest.json
+            fi
+            echo "    \"$file_path\": {\"sha256\": \"$file_hash\"}" >> manifest.json
+          done
+          echo "  }" >> manifest.json
+          echo "}" >> manifest.json
+          
           # Create a tarball of the build directory
-          tar -czf build.tar.gz -C build .
-
-          # Debugging: Check file existence
+          tar -czf ../build.tar.gz .
+          cd ..
+          
+          # Debugging: Check files
+          echo "Checking build.tar.gz:"
           ls -l build.tar.gz
-
+          echo "Checking manifest.json:"
+          cat build/manifest.json
+          
           # Upload using curl
           RESPONSE=$(curl -s -X POST "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/pages/projects/windsurf/deployments" \
             -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" \
             -F "file=@build.tar.gz" \
             -F "manifest=@build/manifest.json;type=application/json" \
-            --write-out "%{http_code}")
-
-          echo "Response code: ${RESPONSE}"
-
-          if [[ "${RESPONSE}" != "200" ]]; then
+            -w "\n%{http_code}")
+          
+          HTTP_STATUS=$(echo "$RESPONSE" | tail -n1)
+          RESPONSE_BODY=$(echo "$RESPONSE" | head -n-1)
+          
+          echo "Response body: ${RESPONSE_BODY}"
+          echo "HTTP status: ${HTTP_STATUS}"
+          
+          if [[ "${HTTP_STATUS}" != "200" ]]; then
             echo "Failed to deploy to Pages"
             exit 1
           fi
